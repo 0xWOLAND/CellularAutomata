@@ -57,6 +57,14 @@ vec2 normalize(vec2 v){
 	return v / mag(v);
 }
 
+Ray normalize(Ray r){
+	float val = mag(vec3(r.x, r.y, r.z));
+	r.x /= val;
+	r.y /= val;
+	r.z /= val;
+	return r;
+}
+
 
 
 bool inCube(vec3 v, float cube){
@@ -80,58 +88,103 @@ Ray invert(Ray r){
 bool isFilled(vec4 v){
 	float th = 0.005;
 
-	return v.x > th && v.y > th && v.z > th;
+	return v.x + v.y + v.z > th;
 }
 
 bool check(int i, int j, int k){
 	return isFilled(texelFetch(pixels, ivec2(i, floor(width) * j + k), 0));
 }
 
-int clamp(float val, int limit){
-	
-	float threshold = 0.01f;
-	if(val < threshold) return 0;
-	else if(val > float(limit) - threshold) return limit - 1;
-	int ans = int(ceil(val)) * limit;
-	if(val > 0.5) return 0;
-	return min(limit, ans);
-}
+
 
 bool getPosition(vec3 v){
-	int i = clamp(v.x, int(width));
-	int j = clamp(v.y, int(width));
-	int k = clamp(v.z, int(width));
-
-	if(i == 0) return true;
-
-	return check(i,j,k);
-	
+	//return v.z < 0.0f;
+   return check(int(v.x), int(v.y), int(v.z));
 }
 
 
-vec4 RayMarching(vec2 crd, float st){
-	vec2 coord = normalize(crd);
-	vec3 cp = normalize(vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z));
-	Ray r = Ray(cp.x - coord.x,
-		  cp.y - coord.y,
-		  cp.z,
-		  false);
-	r = invert(r);
-	float current_step = 0.0f;
-	bool hit = false;
-	// CameraPosition: (0,0,1)
-	vec3 projectedRay = cameraPosition + toVec3(r) * current_step; 
-	while(inCube(projectedRay, width) && current_step < 100.0f){
-		if(getPosition(projectedRay)){
-			r.isHit = true;
+vec4 RayMarching(vec2 crd){
+	
+	int x1 = int(crd.x);
+	int y1 = int(crd.y);
+	int z1 = 0;
+	int x0 = int(cameraPosition.x);
+	int y0 = int(cameraPosition.y);
+	int z0 = -int(cameraPosition.z);
+
+	int dx = abs(x1 - x0);
+	int dy = abs(y1 - y0);
+	int dz = abs(z1 - z0);
+	int stepX = x0 < x1 ? 1 : -1;
+	int stepY = y0 < y1 ? 1 : -1;
+	int stepZ = z0 < z1 ? 1 : -1;
+	float hypotenuse = sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2));
+	float tMaxX = hypotenuse * 0.5 / dx;
+	float tMaxY = hypotenuse * 0.5 / dy;
+	float tMaxZ = hypotenuse * 0.5 / dz;
+	float tDeltaX = hypotenuse / dx;
+	float tDeltaY = hypotenuse / dy;
+	float tDeltaZ = hypotenuse / dz;
+	// while (x0 != x1 || y0 != y1 || z0 != z1){
+	while (x0 != width && y0 != width && z0 != width){
+		if (tMaxX < tMaxY) {
+			if (tMaxX < tMaxZ) {
+				x0 = x0 + stepX;
+				tMaxX = tMaxX + tDeltaX;
+			}
+			else if (tMaxX > tMaxZ){
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+			else{
+				x0 = x0 + stepX;
+				tMaxX = tMaxX + tDeltaX;
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
 		}
-		current_step += 0.01f;
-		projectedRay = cameraPosition + toVec3(r) * st; 
+		else if (tMaxX > tMaxY){
+			if (tMaxY < tMaxZ) {
+				y0 = y0 + stepY;
+				tMaxY = tMaxY + tDeltaY;
+			}
+			else if (tMaxY > tMaxZ){
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+			else{
+				y0 = y0 + stepY;
+				tMaxY = tMaxY + tDeltaY;
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+
+			}
+		}
+		else{
+			if (tMaxY < tMaxZ) {
+				y0 = y0 + stepY;
+				tMaxY = tMaxY + tDeltaY;
+				x0 = x0 + stepX;
+				tMaxX = tMaxX + tDeltaX;
+			}
+			else if (tMaxY > tMaxZ){
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+			else{
+				x0 = x0 + stepX;
+				tMaxX = tMaxX + tDeltaX;
+				y0 = y0 + stepY;
+				tMaxY = tMaxY + tDeltaY;
+				z0 = z0 + stepZ;
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+			if(getPosition(vec3(round(x0),round(y0),round(z0)))){
+				return BLACK;
+			}
+		}
 	}
-	if(r.isHit){
-		return vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	return vec4(r.x, r.y, r.z, 1.0f);
+	return WHITE;
 }
 
 
@@ -139,11 +192,13 @@ void main()
 {
 	if(-gwidth < pos.x && pos.x < gwidth && -gwidth < pos.y && pos.y < gwidth){
 		//FragColor = vec4(texture(pixels, texPos));
-		vec2 coord = vec2(gl_FragCoord.x, gl_FragCoord.y) / u_resolution;
-		FragColor = RayMarching(coord, 0.001f);
+		vec2 tPos = vec2(pos.x, pos.y);
+		tPos = tPos / (gwidth / width) + gwidth;
+		FragColor = RayMarching(tPos);
 	}
 	else{
-		FragColor = BACKGROUND;
+		// FragColor = BACKGROUND;
+		FragColor = vec4(fc.x, fc.y, 0.0f, 1.0f);
 	}
 
 		
