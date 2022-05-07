@@ -235,7 +235,8 @@ vec4 RayMarching(vec2 crd){
 }
 
 bool getPosition2(vec3 v){
-	return v.x < 1.0f && v.y < 1.0f;
+//	return v.x < 1.0f && v.y < 1.0f;
+	return getPosition(v);
 }
 
 vec3 mClamp(vec3 v){
@@ -263,16 +264,17 @@ vec4 RayMarching2(vec2 crd){
 	bool flag = false;
 	while(withinDist(currentPosition, 5.0f)){
 		if(getPosition2(currentPosition)){
-			return BLACK;
+			return WHITE;
 		}
-		currentPosition += (directedRay / 1000.0f);
+		currentPosition += (directedRay / 100.0f);
 	}
 	vec3 temp = getOffset(currentPosition);
 	float ans = temp.z;
 	if(!(0 <= currentPosition.x && currentPosition.x < width)) ans = max(ans, temp.x);
 	if(!(0 <= currentPosition.y && currentPosition.y < width)) ans = max(ans, temp.y);
 	if(!(0 <= currentPosition.z && currentPosition.z < width)) ans = max(ans, temp.z);
-
+	
+	
 	if(ans == temp.x){
 		return RED;
 	}
@@ -282,7 +284,8 @@ vec4 RayMarching2(vec2 crd){
 	else if(ans == temp.z){
 		return BLUE;
 	}
-	return P_GREEN;
+	
+	return BACKGROUND;
 
 }
 
@@ -301,8 +304,8 @@ void main()
 		FragColor = RayMarching2(tPos);
 	}
 	else{
-		// FragColor = BACKGROUND;
-		FragColor = vec4(fc.x, fc.y, 0.0f, 1.0f);
+		FragColor = BACKGROUND;
+		//FragColor = vec4(fc.x, fc.y, 0.0f, 1.0f);
 		if(fc.x < 0) FragColor = GREEN;
 		// FragColor = getVoxel(0,0,1);
 	}

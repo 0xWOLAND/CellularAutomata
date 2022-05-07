@@ -68,8 +68,8 @@ int main()
 		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
 
 		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
 
@@ -105,7 +105,7 @@ int main()
 
 
 	// Creates camera object
-	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 4.0f));
+	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 1.25f));
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -117,6 +117,7 @@ int main()
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "width"), dimension);
+		std::cout << "CAMERA POSITION: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << "\n";
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "cameraPosition"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniform2f(glGetUniformLocation(shaderProgram.ID, "u_resolution"), width, height);
 		VAO1.Bind();
