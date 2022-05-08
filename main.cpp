@@ -9,7 +9,10 @@
 #include "Texture.h"
 #include <vector>
 #include "Camera.h"
-
+#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <time.h>
 const int width = 800;
 const int height = 800;
 
@@ -103,20 +106,29 @@ int main()
 	VBO1.Unbind();
 	EBO1.Unbind();
 
-
-	// Creates camera object
+	using Clock = std::chrono::high_resolution_clock;
+	using TimePoint = std::chrono::time_point<Clock>;
+	typedef std::chrono::milliseconds ms;
+	typedef std::chrono::duration<float> fsec;
+	TimePoint t0, t1;
+	float global_time = 0;
+	t0 = Clock::now();
 	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 2.525f));
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		shaderProgram.Activate();
+		t1 = Clock::now();
+		fsec dt = t1 - t0;
 
+		global_time = dt.count();
 		// Handles camera inputs
 		camera.Inputs(window);
 		// Updates and exports the camera matrix to the Vertex Shader
 		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "width"), dimension);
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), (float)(global_time));
 		std::cout << "CAMERA POSITION: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << "\n";
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "cameraPosition"), camera.Position.x, camera.Position.y, camera.Position.z);
 		glUniform2f(glGetUniformLocation(shaderProgram.ID, "u_resolution"), width, height);

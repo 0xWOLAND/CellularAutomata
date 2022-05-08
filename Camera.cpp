@@ -7,6 +7,8 @@ Camera::Camera(int width, int height, glm::vec3 position)
 	Camera::width = width;
 	Camera::height = height;
 	Position = position;
+	double mouseX = 0;
+	double mouseY = 0;
 }
 
 void Camera::Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shader, const char* uniform)
@@ -22,6 +24,7 @@ void Camera::Matrix(float FOVdeg, float nearPlane, float farPlane, Shader& shade
 
 	// Exports the camera matrix to the Vertex Shader
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
+	glUniform2f(glGetUniformLocation(shader.ID, "iMouse"), mouseX, mouseY);
 }
 
 
@@ -77,8 +80,7 @@ void Camera::Inputs(GLFWwindow* window)
 		}
 
 		// Stores the coordinates of the cursor
-		double mouseX;
-		double mouseY;
+		
 		// Fetches the coordinates of the cursor
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
