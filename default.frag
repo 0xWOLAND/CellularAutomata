@@ -253,16 +253,24 @@ vec3 getOffset(vec3 v){
 		max(abs(v.z), abs(v.z - width))
 	);
 }
+
+bool withinDist(vec3 v, vec3 cp, float f){
+		return (
+			((-f <= v.x || cp.x < -f) && (v.x <= f || cp.x > f)) && 
+			((-f <= v.y || cp.y < -f) && (v.y <= f || cp.y > f)) && 
+			((-f <= v.z || cp.z < -f) && (v.z <= f || cp.z > f))
+			);
+
+}
 vec4 RayMarching2(vec2 crd){
-	
 	vec3 directedRay = vec3(
-		crd.x - cameraPosition.x,
-		crd.y - cameraPosition.y,
+		(crd.x - cameraPosition.x),
+		(crd.y - cameraPosition.y),
 		cameraPosition.z);
 	vec3 currentPosition = vec3(cameraPosition.x, cameraPosition.y, -cameraPosition.z);
 	directedRay = normalize(directedRay);
 	bool flag = false;
-	while(withinDist(currentPosition, 5.0f)){
+	while(withinDist(currentPosition, width * cameraPosition.z)){
 		if(getPosition2(currentPosition)){
 			return WHITE;
 		}
@@ -289,6 +297,45 @@ vec4 RayMarching2(vec2 crd){
 
 }
 
+vec4 RayMarching3(vec2 crd){
+	//crd *= cameraPosition.z;
+	crd *= cameraPosition.z;
+	crd -= crd / 2;
+	vec3 directedRay = vec3(
+		(cameraPosition.x - crd.x),
+		(cameraPosition.y - crd.y),
+		cameraPosition.z);
+	//vec3 currentPosition = vec3(cameraPosition.x, cameraPosition.y, -cameraPosition.z);
+	vec3 currentPosition = vec3(crd.x, crd.y, 0.0f);
+	directedRay = normalize(directedRay);
+	bool flag = false;
+	while(inRange(currentPosition, 0.0f, 5.0f)){
+//	for(int i = 0; i < 50000; i++){
+		if(getPosition2(currentPosition * mag(cameraPosition))){
+			return WHITE;
+		}
+		currentPosition += (directedRay / 100.0f);
+	}
+	vec3 temp = getOffset(currentPosition);
+	float ans = temp.z;
+	if(!(0 <= currentPosition.x && currentPosition.x < width)) ans = max(ans, temp.x);
+	if(!(0 <= currentPosition.y && currentPosition.y < width)) ans = max(ans, temp.y);
+	if(!(0 <= currentPosition.z && currentPosition.z < width)) ans = max(ans, temp.z);
+	
+	
+	if(ans == temp.x){
+		return RED;
+	}
+	else if(ans == temp.y){
+		return GREEN;
+	}
+	else if(ans == temp.z){
+		return BLUE;
+	}
+	
+	return BACKGROUND;
+
+}
 void main()
 {
 	
@@ -298,15 +345,15 @@ void main()
 		// tPos = tPos / (gwidth / width) + gwidth;
 		// tPos.x = max(tPos.x, width);
 		// tPos.y = max(tPos.y, width);
-		vec2 tPos = vec2(fc.x, fc.y) * (width);
+		vec2 tPos = vec2(fc.x, fc.y);
 		// if(tPos.x < 4) FragColor = GREEN;
 		// else FragColor = BLUE;
-		FragColor = RayMarching2(tPos);
+		FragColor = RayMarching3(tPos);
 	}
 	else{
 		FragColor = BACKGROUND;
-		//FragColor = vec4(fc.x, fc.y, 0.0f, 1.0f);
-		if(fc.x < 0) FragColor = GREEN;
+		FragColor = vec4(fc.x, fc.y, 0.0f, 1.0f);
+		//if(fc.x < 0) FragColor = GREEN;
 		// FragColor = getVoxel(0,0,1);
 	}
 

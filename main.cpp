@@ -51,7 +51,7 @@ int main()
 
 
 
-	Shader shaderProgram("default.vert", "default.frag");
+	Shader shaderProgram("default.vert", "di.frag");
 
 	float data[] = {
 
@@ -105,7 +105,7 @@ int main()
 
 
 	// Creates camera object
-	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 1.25f));
+	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 2.525f));
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
