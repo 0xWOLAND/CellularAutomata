@@ -89,10 +89,11 @@ float GetDist(vec3 p) {
     float pd = p.y;
     // rotating box
     vec3 bp = p;
-    bp -= vec3(0,3,0);
+    //bp -= vec3(0,3,0);
+    bp -= vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     //bp -= vec3(5,.75,3);		// translation
     //bp.xz *= Rot(iTime);		// rotation
-    float rotate = dBox(bp, vec3(.75));
+    float rotate = dBox(bp, vec3(.25));
     
     /*
     // jumping torus
@@ -210,7 +211,8 @@ void main()
     	vec3 p = ro + rd * d;
     
     	float dif = GetLight(p);
-    	col = vec3(dif);
+        col = vec3(dif);
+    	if(p.y > 0.5f) col *= RED;
     }
     
     col = pow(col, vec3(.4545));	// gamma correction
