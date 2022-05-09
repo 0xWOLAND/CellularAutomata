@@ -1,6 +1,7 @@
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
+#include <AntTweakBar.h>
 
 #include"shaderClass.h"
 #include"VAO.h"
@@ -12,6 +13,9 @@
 
 const int width = 800;
 const int height = 800;
+double speed=0.3;
+double turn=0;
+float g_Zoom = 1.0f;
 
 GLfloat vertices[] =
 {
@@ -32,6 +36,7 @@ GLuint indices[] =
 int main()
 {
 	glfwInit();
+	TwBar *bar;
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -49,7 +54,12 @@ int main()
 	gladLoadGL();
 	glViewport(0, 0, width, height);
 
+	TwInit(TW_OPENGL, NULL);
 
+	bar=TwNewBar("TweakBar");
+	TwDefine("GLOBAL help='Cellular Automata 3d modeling using openGL that allows you to input rules as well as use presets.'");
+	TwAddVarRW(bar, "speed", TW_TYPE_DOUBLE, &speed, " label='Rotational speed' min=0 max=2 step=0.01 keyIncr=d keyDecr=a help='Rotation speed (turns/second)' ");
+	TwAddVarRW(bar, "Zoom", TW_TYPE_FLOAT, &g_Zoom, " min=0.01 max=2.5 step=0.01 keyIncr=z keyDecr=Z help='Scale the object (1=original size).' ");
 
 	Shader shaderProgram("default.vert", "default.frag");
 
