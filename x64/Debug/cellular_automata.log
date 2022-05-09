@@ -1,4 +1,2 @@
-﻿  Camera.cpp
-C:\Users\bharg\OneDrive\Desktop\cellular_automata\Camera.cpp(27,65): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\bharg\OneDrive\Desktop\cellular_automata\Camera.cpp(27,57): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+﻿  main.cpp
   cellular_automata.vcxproj -> C:\Users\bharg\OneDrive\Desktop\cellular_automata\x64\Debug\cellular_automata.exe

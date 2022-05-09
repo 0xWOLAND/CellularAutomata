@@ -187,14 +187,17 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
     return d;
 }
 
-vec3 handleColoring(vec3 p, vec3 col){
-    if(p.y > 0.5f){
-        
-        if(p.x < 0) col *= BLUE;
-        if(p.z < 0) col *= GREEN;
-        if(p.y > 1.5){
-            col *= RED;
-        }
+vec4 getVoxel(vec3 v){
+    int i = int(v.x);
+    int j = int(v.y);
+    int k = int(v.z);
+	return texelFetch(pixels, ivec2(i, floor(width) * k + j), 0);
+}
+
+vec3 handleColoring(vec3 p, vec3 col){  
+    vec3 color = vec3(getVoxel(p * 5));
+    if(p.y > 0.5){
+        col *= color;
     }
     return col;
 }
@@ -219,7 +222,8 @@ void main()
     
     if(d<MAX_DIST) {
     	vec3 p = ro + rd * d;
-    
+        
+
     	float dif = GetLight(p);
         col = vec3(dif);
     	col = handleColoring(p, col);
