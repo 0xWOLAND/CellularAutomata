@@ -79,6 +79,18 @@ float dBox(vec3 p, vec3 s) {
 	return length(max(p, 0.))+min(max(p.x, max(p.y, p.z)), 0.);
 }
 
+vec4 getVoxel(vec3 v){
+    int i = int(v.x);
+    int j = int(v.y);
+    int k = int(v.z);
+	return texelFetch(pixels, ivec2(i, floor(width) * k + j), 0);
+}
+
+bool isFilled(vec3 v){
+    float threshold = 0.005f;
+    vec3 temp = vec3(getVoxel(v));
+    return length(temp) > threshold;
+}
 
 float GetDist(vec3 p) {
     
@@ -93,8 +105,15 @@ float GetDist(vec3 p) {
     //bp -= vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z);
     //bp -= vec3(5,.75,3);		// translation
     //bp.xz *= Rot(iTime);		// rotation
-    float rotate = dBox(bp, vec3(1.0));
-    
+    //float rotate = max(dBox(bp, vec3(1.0)), -dBox(vec3(0, 2.5, 0), vec3(1.5)));
+    // Splits one voxel into smalle rcomponents
+    float rotate = max(
+        -dBox(p-vec3(50,0,0), vec3(1)), 
+        dBox(p - vec3(0,1,0), vec3(0.25))
+    );
+    rotate = min(rotate,
+        dBox(p - vec3(0,2,0), vec3(0.25))
+        );
     /*
     // jumping torus
     float y = -fract(t)*(fract(t)-1.);			// repeating parabola
@@ -127,8 +146,9 @@ float GetDist(vec3 p) {
         .2
     );
     */
+    float d = min(pd, rotate);
     
-    float d = min(rotate, pd);
+    // Use line tracing alg here
     /*
     d = min(d, morph);
     d = min(d, subtract);
@@ -187,12 +207,6 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
     return d;
 }
 
-vec4 getVoxel(vec3 v){
-    int i = int(v.x);
-    int j = int(v.y);
-    int k = int(v.z);
-	return texelFetch(pixels, ivec2(i, floor(width) * k + j), 0);
-}
 
 vec3 handleColoring(vec3 p, vec3 col){  
     vec3 color = vec3(getVoxel(p * 5));
@@ -226,8 +240,9 @@ void main()
 
     	float dif = GetLight(p);
         col = vec3(dif);
-    	col = handleColoring(p, col);
-        //if(p.y > 0.5f) col *= RED;
+    	//col = handleColoring(p, col);
+        if(p.y > 0.5f) col *= RED;
+        
     }
     
     col = pow(col, vec3(.4545));	// gamma correction
