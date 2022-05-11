@@ -130,6 +130,7 @@ int main()
 		glUniform2f(glGetUniformLocation(shaderProgram.ID, "u_resolution"), width, height);
 		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, 7, GL_UNSIGNED_INT, 0);
+		TwDraw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -141,6 +142,7 @@ int main()
 	EBO1.Delete();
 	shaderProgram.Delete();
 	glfwDestroyWindow(window);
+	TwTerminate();
 	glfwTerminate();
 	return 0;
 }
