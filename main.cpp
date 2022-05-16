@@ -1,150 +1,241 @@
-#include<iostream>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
-
-#include"shaderClass.h"
-#include"VAO.h"
-#include"VBO.h"
-#include"EBO.h"
-#include "Texture.h"
-#include <vector>
-#include "Camera.h"
+#include "./headers/Camera.h"
+#include "./headers/Objects.h"
+#include "./headers/Shader.h"
+#include "./headers/buffer.h"
+#include "./headers/WireFrame.h"
+#include "./headers/Arguments.h"
+#include "./headers/TimerUtil.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <GL/freeglut_ext.h>
+#include <GL/glew.h>
+#include <GL/glext.h>
+#include "./headers/glm/gtx/string_cast.hpp"
 #include <iostream>
-#include <chrono>
-#include <ctime>
-#include <time.h>
-const int width = 800;
-const int height = 800;
+#include <string>
+#include <algorithm>
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
+#define GLM_ENABLE_EXPERIMENTAL
+using namespace std;
+float fstep = 0.9f;
+float near = 5.0f;
+float far = 150.0f;
+float fovy = 45.0f;
+float aspect = SCREEN_HEIGHT / SCREEN_WIDTH;
+bool rotation = false, animation = false;
+bool flag = 0;
+bool LIGHTING_ENABLED = true;
+string VERTEX_SHADER_PATH = "./shaders/shader.vs";
+string FRAG_SHADER_PATH = "./shaders/shader.fs";
+int ANIM_STEP = 1;
+int RULE;
+int tt = 0;
+double avg_time = 0.0;
+double fc = 0.0;
+int SIDE_LENGTH = 0;
 
-GLfloat vertices[] =
+TimerUtil *tmr;
+Shader *sh;
+Camera *c;
+Object *cubes = new Object();
+bufferIndex *wire_vb;
+Shader *wire_sh;
+WireFrame *wf;
+WireFrame *light_wf;
+
+void display()
 {
-	-1.0f, -1.0f, 1.0f,	 0.5f, 0.5f,
-	 1.0f, -1.0f, 1.0f,	 0.0f, 0.5f,
-	-1.0f,  1.0f, 1.0f,	 0.5f, 0.0f,
-	 1.0f,  1.0f, 1.0f,  0.0f, 0.0f
+    tmr->startTimer();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.82745098039, 0.82745098039, 0.82745098039, 1.0);
+
+    cubes->draw();
+    if (animation && tt % ANIM_STEP == 0)
+    {
+        tt = 0;
+        cubes->update();
+    }
+    if (rotation && flag)
+        c->rotate(rotation);
+    wf->draw();
+
+    glutSwapBuffers();
+    double ms_double = tmr->stopTimer();
+    avg_time += ms_double;
+    fc += 1;
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+    case 'i':
+        c->rotateCamera(0.01f, glm::vec3(1.0f, 0.0f, 0.0f));
+        break;
+    case 'k':
+        c->rotateCamera(0.01f, glm::vec3(0.0f, 1.0f, 0.0f));
+        break;
+    case 'j':
+        c->rotateCamera(0.01f, glm::vec3(0.0f, 0.0f, 1.0f));
+        break;
+    case 'z':
+        c->zoomCamera(1 / fstep);
+        break;
+    case 'x':
+        c->zoomCamera(fstep);
+        break;
+    case 'u':
+        cubes->update();
+        break;
+    case 'p':
+        animation = !animation;
+        break;
+    case 't':
+        rotation = !rotation;
+        break;
+    case 'a':
+
+        c->translate(glm::vec3(1.0f, 0.0f, 0.0f));
+
+        break;
+    case 'd':
+
+        c->translate(glm::vec3(-1.0f, 0.0f, 0.0f));
+        break;
+    case 'w':
+
+        c->translate(glm::vec3(0.0f, 0.0f, -1.0f));
+        break;
+    case 's':
+
+        c->translate(glm::vec3(0.0f, 0.0f, 1.0f));
+        break;
+    case 'q':
+
+        c->translate(glm::vec3(0.0f, -1.0f, 0.0f));
+        break;
+    case 'e':
+
+        c->translate(glm::vec3(0.0f, 1.0f, 0.0f));
+        break;
+    case 27:
+        glutLeaveMainLoop();
+        cout << "[avg frame rate]: " << 1000 * fc / (avg_time) << " f/s"
+             << endl;
+        return;
+    };
+    glutPostRedisplay();
+}
+
+void Timer(int value)
+{
+    glutTimerFunc(10, Timer, 0);
+    tt += 1;
+    glutPostRedisplay();
+}
+
+void readConfig(string filename)
+{
+    ifstream istr(filename);
+    istr >> SIDE_LENGTH;
+    istr >> LIGHTING_ENABLED;
+    istr >> RULE;
+    istr >> animation;
+    istr >> rotation;
+    VERTEX_SHADER_PATH = LIGHTING_ENABLED ? "./shaders/shader.vs" : "./shaders/shader_nl.vs";
+    FRAG_SHADER_PATH = LIGHTING_ENABLED ? "./shaders/shader.fs" : "./shaders/shader_nl.fs";
+}
+
+void procesArguments(int argc, char **argv)
+{
+
+    string arg1, arg2, arg3;
+    switch (argc)
+    {
+
+    case 2:
+        arg1 = string(argv[1]);
+        RULE = atoi(arg1.c_str());
+        break;
+    case 3:
+        arg1 = string(argv[1]);
+        arg2 = string(argv[2]);
+        animation = arg1 == "true";
+        rotation = arg2 == "true";
+        break;
+    case 4:
+        arg1 = string(argv[1]);
+        arg2 = string(argv[2]);
+        animation = arg1 == "true";
+        rotation = arg2 == "true";
+        RULE = atoi(argv[3]);
+        break;
+    case 5:
+        arg1 = string(argv[1]);
+        arg2 = string(argv[2]);
+        animation = arg1 == "true";
+        rotation = arg2 == "true";
+        RULE = atoi(argv[3]);
+        SIDE_LENGTH = atoi(argv[4]);
+        break;
+    case 6:
+        arg1 = string(argv[1]);
+        arg2 = string(argv[2]);
+        animation = arg1 == "true";
+        rotation = arg2 == "true";
+        RULE = atoi(argv[3]);
+        SIDE_LENGTH = atoi(argv[4]);
+        ANIM_STEP = atoi(argv[5]);
+        break;
+    };
+}
+
+void init()
+{
+    int argc = 1;
+    rotation = false;
+    flag = true;
+    glutInit(&argc, 0);
+    glutInitContextVersion(3, 3);
+    glutInitContextProfile(GLUT_CORE_PROFILE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+    glutInitWindowPosition(1.00, 1.00);
+    glutCreateWindow("Cellular Automata");
+    glutKeyboardFunc(keyboard);
+    glClearColor(0.82745098039, 0.82745098039, 0.82745098039, 1.0);
+    glutTimerFunc(0, Timer, 0);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glAlphaFunc(GL_GREATER, 1);
+    glEnable(GL_ALPHA_TEST);
+    glutDisplayFunc(display);
+    glewInit();
+    readConfig("./configs/config");
 };
 
-GLuint indices[] =
+int main(int argc, char **argv)
 {
-	0, 1, 3, 0,
-	2, 3, 0
-};
+    if (cmdOptionExists(argv, argv + argc, "-h"))
+    {
+        printHelpMenu();
+    }
+    init();
+    tmr = new TimerUtil();
+    procesArguments(argc, argv);
+    c = new Camera(glm::vec3((SIDE_LENGTH / 2.0f), SIDE_LENGTH + 50.0f, SIDE_LENGTH + 50.0f),
+                   glm::vec3((SIDE_LENGTH / 2.0f), 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), fovy,
+                   aspect, near, far);
+    wf = new WireFrame(2.5f, (float)SIDE_LENGTH, c, "./shaders/shader_nl.vs",
+                       "./shaders/shader_nl.fs");
 
-const float dimension = 5.0f;
-
-int main()
-{
-	glfwInit();
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(width, height, "CA", NULL, NULL);
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	gladLoadGL();
-	glViewport(0, 0, width, height);
-
-
-
-	Shader shaderProgram("default.vert", "di.frag");
-
-	float data[] = {
-
-		1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-
-		1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-
-	};
-
-	Texture t(data, int(dimension), int(dimension) * int(dimension));
-	t.BindTexture();
-	t.applyTexture();
-
-	VAO VAO1;
-	VAO1.Bind();
-
-	VBO VBO1(vertices, sizeof(vertices));
-	EBO EBO1(indices, sizeof(indices));
-
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)(0));
-	VAO1.LinkAttrib(VBO1, 1, 2, GL_FLOAT, int(dimension) * sizeof(float), (void*)(3 * sizeof(float)));
-	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
-
-	using Clock = std::chrono::high_resolution_clock;
-	using TimePoint = std::chrono::time_point<Clock>;
-	typedef std::chrono::milliseconds ms;
-	typedef std::chrono::duration<float> fsec;
-	TimePoint t0, t1;
-	float global_time = 0;
-	t0 = Clock::now();
-	Camera camera(width, height, glm::vec3(2.5f, 2.5f, 2.525f));
-	while (!glfwWindowShouldClose(window))
-	{
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		shaderProgram.Activate();
-		t1 = Clock::now();
-		fsec dt = t1 - t0;
-
-		global_time = dt.count();
-		// Handles camera inputs
-		camera.Inputs(window);
-		// Updates and exports the camera matrix to the Vertex Shader
-		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
-		glUniform1f(glGetUniformLocation(shaderProgram.ID, "width"), dimension);
-		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), (float)(global_time));
-		std::cout << "CAMERA POSITION: " << camera.Position.x << " " << camera.Position.y << " " << camera.Position.z << "\n";
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "cameraPosition"), camera.Position.x, camera.Position.y, camera.Position.z);
-		glUniform2f(glGetUniformLocation(shaderProgram.ID, "u_resolution"), width, height);
-		VAO1.Bind();
-		glDrawElements(GL_TRIANGLES, 7, GL_UNSIGNED_INT, 0);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
-
-
-
-	VAO1.Delete();
-	VBO1.Delete();
-	EBO1.Delete();
-	shaderProgram.Delete();
-	glfwDestroyWindow(window);
-	glfwTerminate();
-	return 0;
+    cubes->init(VERTEX_SHADER_PATH, FRAG_SHADER_PATH, LIGHTING_ENABLED, SIDE_LENGTH, c, RULE);
+    glutMainLoop();
+    return 0;
 }
