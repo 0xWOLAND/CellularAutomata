@@ -232,6 +232,7 @@ class Object {
                 btranslations.push_back(((side_len - 1 - x) | ((side_len - 1 - y) << 8) | ((side_len - 1 - z) << 16)));
             }
         }
+        BST tree;
         node* temp;
         for(int i = 0; i < btranslations.size(); i++){
             temp = new node;
