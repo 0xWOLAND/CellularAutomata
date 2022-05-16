@@ -232,13 +232,6 @@ class Object {
                 btranslations.push_back(((side_len - 1 - x) | ((side_len - 1 - y) << 8) | ((side_len - 1 - z) << 16)));
             }
         }
-        // NOTE: in theory this should help performance but doesn't
-        // std::sort(translations.begin(), translations.end(),[this](const glm::vec3 &struct1, const
-        // glm::vec3 &struct2) {
-        //    return (glm::length(struct1 - this->cam->eye) <
-        //         glm::length(struct2 - this->cam->eye));
-        // });
-        BST tree;
         node* temp;
         for(int i = 0; i < btranslations.size(); i++){
             temp = new node;
