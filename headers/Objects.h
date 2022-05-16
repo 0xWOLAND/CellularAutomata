@@ -238,7 +238,15 @@ class Object {
         //    return (glm::length(struct1 - this->cam->eye) <
         //         glm::length(struct2 - this->cam->eye));
         // });
-        sort(btranslations.begin(), btranslations.end());
+        BST tree;
+        node* temp;
+        for(int i = 0; i < btranslations.size(); i++){
+            temp = new node;
+            temp->key_value = btranslations[i];
+            temp->p_left = temp->p_right = NULL;
+            tree.insert(tree.root, temp);
+        }
+        btranslations = tree.getArray();
         std::swap(cells_vec, next_gen_vec);
     };
 

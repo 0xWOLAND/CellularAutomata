@@ -8,7 +8,7 @@
 #include "./buffer.h"
 #include <vector>
 using namespace std;
-class WireFrame {
+class Mesh {
   public:
     buffer *wvb;
     Shader *wsh;
@@ -17,7 +17,7 @@ class WireFrame {
 
     vector<unsigned int> wire_elements;
 
-    WireFrame(float size, float side_len, Camera *c, string vertex_shader, string fragment_shader) {
+    Mesh(float size, float side_len, Camera *c, string vertex_shader, string fragment_shader) {
         wire_vertices = {
             // verts			      //colors
             -size, -size, side_len+size, 0.0, 0.0, 0.0, 1.0, // front bottom left
@@ -38,7 +38,7 @@ class WireFrame {
         wsh = new Shader(vertex_shader.c_str(), fragment_shader.c_str());
         cam = c;
     };
-    ~WireFrame();
+    ~Mesh();
 
     void updateSize(float size) {
         for (int i = 0; i < wire_vertices.size(); i++) {
