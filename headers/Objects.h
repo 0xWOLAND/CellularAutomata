@@ -263,7 +263,7 @@ class Object {
         int n = side_len;
         std::vector<float> green(n);
         for(float i = 0; i < n; i++){
-            green[(int)(i)] = Color::L(3 * ((4 / w) * i - 3));
+            green[(int)(i)] = Color::L(2 * ((4 / w) * i - 3));
             printf("GREEN: %f, %f\n", i, green[(int)(i)]);
         }
         return green;
@@ -275,7 +275,7 @@ class Object {
         int n = side_len;
         std::vector<float> blue(n);
         for(float i = 0; i < n; i++){
-            blue[(int)(i)] = Color::L(-3 * ((4 / w) * i - 1));
+            blue[(int)(i)] = Color::L(-2 * ((4 / w) * i - 1));
             printf("BLUE: %f, %f\n", i, blue[(int)(i)]);
         }
         return blue;
