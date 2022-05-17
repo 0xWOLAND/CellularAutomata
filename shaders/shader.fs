@@ -7,19 +7,24 @@ uniform bool is_wire;
 uniform float side_len;
 uniform vec3 eye;
 uniform float time;
+#define e 2.71828182845904
+float pow(float a, float b){
+    float ans = 1;
+    for(int i = 0; i < b; i++){
 
+        ans *= a;
+    }
+    return a;
+}
 vec3 lighting()
 {
     float x = position.x;
     float y = position.y;
     float z = position.z;
     float r = sqrt((x - side_len)*(x - side_len) + (y - side_len)*(y - side_len) + (z - side_len)*(z - side_len));
-    float red =    r / (side_len * (2.3 - 0.36 * time * cos(0.09  * time))) ;
-    float green =  r / (side_len * (2.9 - 0.82 * time * sin(0.18  * time))) ;
-    float blue =   r / (side_len * (3.2 - 0.18 * time * cos(0.22 * time))) ;
-    
-    //float green = 0.5* abs(side_len / 2 - position.y)/side_len;
-    //float blue =  0.5* abs(side_len / 2 - position.z)/side_len;
+     float red =    r / (side_len * (2.3 - 0.36 * time * cos(0.09  * time))) ;
+     float green =  r / (side_len * (2.9 - 0.82 * time * sin(0.18  * time))) ;
+     float blue =   r / (side_len * (3.2 - 0.18 * time * cos(0.22 * time))) ;
     // [0, sidelength]
     vec3 amb = vec3(red,green,blue);
     vec3 diff = vec3(red,green,blue);

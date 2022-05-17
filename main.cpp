@@ -4,6 +4,7 @@
 #include "./headers/buffer.h"
 #include "./headers/Mesh.h"
 #include "./headers/Arguments.h"
+#include "./levenshtein.h"
 #include "./headers/TimerUtil.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -44,6 +45,24 @@ bufferIndex *wire_vb;
 Shader *wire_sh;
 Mesh *wf;
 Mesh *light_wf;
+
+std::vector<std::string> possible_rules = {
+"445",
+"CLOUDS",
+"AMOEBA",
+"PULSE_WAVE",
+"von_Neumann_Builder",
+"Architecture",
+"Custom1",
+"Custom2",
+"Custom3",
+"Custom4",
+"DA_BRAIN",
+"vonN",
+"test",
+"test",
+"678"
+};
 
 void display()
 {
@@ -152,12 +171,13 @@ void procesArguments(int argc, char **argv)
 {
 
     string arg1, arg2, arg3;
-    switch (argc)
+    Levenshtein L;
+   switch (argc)
     {
 
     case 2:
         arg1 = string(argv[1]);
-        RULE = atoi(arg1.c_str());
+        RULE = L.levenshtein(possible_rules, arg1);
         break;
     case 3:
         arg1 = string(argv[1]);
@@ -170,14 +190,14 @@ void procesArguments(int argc, char **argv)
         arg2 = string(argv[2]);
         animation = arg1 == "true";
         rotation = arg2 == "true";
-        RULE = atoi(argv[3]);
+        RULE = L.levenshtein(possible_rules, argv[3]);
         break;
     case 5:
         arg1 = string(argv[1]);
         arg2 = string(argv[2]);
         animation = arg1 == "true";
         rotation = arg2 == "true";
-        RULE = atoi(argv[3]);
+        RULE = L.levenshtein(possible_rules, argv[3]);
         SIDE_LENGTH = atoi(argv[4]);
         break;
     case 6:
@@ -185,11 +205,12 @@ void procesArguments(int argc, char **argv)
         arg2 = string(argv[2]);
         animation = arg1 == "true";
         rotation = arg2 == "true";
-        RULE = atoi(argv[3]);
+        RULE = L.levenshtein(possible_rules, argv[3]);
         SIDE_LENGTH = atoi(argv[4]);
         ANIM_STEP = atoi(argv[5]);
         break;
     };
+    printf("RULE %d: \n", RULE);
 }
 
 void init()
