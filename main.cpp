@@ -21,8 +21,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 using namespace std;
 float fstep = 0.9f;
-float near = 5.0f;
-float far = 150.0f;
+float near = 50.0f;
+float far = 300.0f;
 float fovy = 45.0f;
 float aspect = SCREEN_HEIGHT / SCREEN_WIDTH;
 bool rotation = false, animation = false;
