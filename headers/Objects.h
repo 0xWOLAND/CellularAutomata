@@ -5,6 +5,7 @@
 #include "./buffer.h"
 #include "./TimerUtil.h"
 #include "./Constants.h"
+#include "./ColorTransition.h"
 #include "./BSTree.h"
 #include <cmath>
 #include <cstdlib>
@@ -82,10 +83,10 @@ class Object {
         stay_alive = vector<float>(na);
         born = vector<float>(nb);
         for (int i = 0; i < na; i++) {
-            istr >> stay_alive[i];
+            istr >> stay_alive[(int)(i)];
         }
         for (int i = 0; i < nb; i++) {
-            istr >> born[i];
+            istr >> born[(int)(i)];
         }
         istr >> lifecycle;
         string nh;
@@ -232,17 +233,53 @@ class Object {
                 btranslations.push_back(((side_len - 1 - x) | ((side_len - 1 - y) << 8) | ((side_len - 1 - z) << 16)));
             }
         }
-        // NOTE: in theory this should help performance but doesn't
-        // std::sort(translations.begin(), translations.end(),[this](const glm::vec3 &struct1, const
-        // glm::vec3 &struct2) {
-        //    return (glm::length(struct1 - this->cam->eye) <
-        //         glm::length(struct2 - this->cam->eye));
-        // });
-        sort(btranslations.begin(), btranslations.end());
+        // BST tree;
+        // node* temp;
+        // for(int i = 0; i < btranslations.size(); i++){
+        //     temp = new node;
+        //     temp->key_value = btranslations[(int)(i)];
+        //     temp->p_left = temp->p_right = NULL;
+        //     tree.insert(tree.root, temp);
+        // }
+        // btranslations = tree.getArray();
         std::swap(cells_vec, next_gen_vec);
     };
 
+    std::vector<float> red_colorByDist(){
+        Color c();
+        float w = (0.75) * (side_len - 2 * sqrt(3));
+        int n = side_len;
+        std::vector<float>red(n);
+        for(float i = 0; i < n; i++){
+            red[(int)(i)] = Color::B(2 * ((4 / w) * i - 2));
+            printf("RED: %f, %f\n", i, red[(int)(i)]);
+        }
+        return red;
+    }
 
+    std::vector<float> green_colorByDist(){
+        Color c();
+        float w = (0.75) * (side_len - 2 * sqrt(3));
+        int n = side_len;
+        std::vector<float> green(n);
+        for(float i = 0; i < n; i++){
+            green[(int)(i)] = Color::L(2 * ((4 / w) * i - 3));
+            printf("GREEN: %f, %f\n", i, green[(int)(i)]);
+        }
+        return green;
+    }
+
+    std::vector<float> blue_colorByDist(){
+        Color c();
+        float w = (0.75) * (side_len - 2 * sqrt(3));
+        int n = side_len;
+        std::vector<float> blue(n);
+        for(float i = 0; i < n; i++){
+            blue[(int)(i)] = Color::L(-2 * ((4 / w) * i - 1));
+            printf("BLUE: %f, %f\n", i, blue[(int)(i)]);
+        }
+        return blue;
+    }
     void draw() {
 
         sh->use();
@@ -250,6 +287,22 @@ class Object {
         sh->setMat4("model", cam->getModel());
         sh->setVec3("eye", cam->eye.x, cam->eye.y, cam->eye.z);
         sh->setFloat("side_len", 0.5f * side_len);
+        
+        int n = side_len;
+        float a[n], b[n], c[n];
+        std::vector<float> _a = red_colorByDist();
+        std::vector<float> _b = green_colorByDist();
+        std::vector<float> _c = blue_colorByDist();
+        for(int i = 0; i < n; i++){
+            a[(int)(i)] = _a[(int)(i)];
+            b[(int)(i)] = _b[(int)(i)];
+            c[(int)(i)] = _c[(int)(i)];
+            printf("%f %f %f\n", a[(int)(i)], b[(int)(i)], c[(int)(i)]);
+        }
+        
+        sh->set1fv("redCol",   a,   n);
+        sh->set1fv("blueCol",  b,  n);
+        sh->set1fv("greenCol", c, n);
         vb->use();
         glBufferSubData(GL_ARRAY_BUFFER, 0, btranslations.size() * sizeof(unsigned int), btranslations.data());
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
