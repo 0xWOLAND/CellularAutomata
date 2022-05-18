@@ -252,7 +252,6 @@ class Object {
         std::vector<float>red(n);
         for(float i = 0; i < n; i++){
             red[(int)(i)] = Color::B(2 * ((4 / w) * i - 2));
-            printf("RED: %f, %f\n", i, red[(int)(i)]);
         }
         return red;
     }
@@ -264,7 +263,6 @@ class Object {
         std::vector<float> green(n);
         for(float i = 0; i < n; i++){
             green[(int)(i)] = Color::L(2 * ((4 / w) * i - 3));
-            printf("GREEN: %f, %f\n", i, green[(int)(i)]);
         }
         return green;
     }
@@ -276,7 +274,6 @@ class Object {
         std::vector<float> blue(n);
         for(float i = 0; i < n; i++){
             blue[(int)(i)] = Color::L(-2 * ((4 / w) * i - 1));
-            printf("BLUE: %f, %f\n", i, blue[(int)(i)]);
         }
         return blue;
     }
@@ -297,7 +294,6 @@ class Object {
             a[(int)(i)] = _a[(int)(i)];
             b[(int)(i)] = _b[(int)(i)];
             c[(int)(i)] = _c[(int)(i)];
-            printf("%f %f %f\n", a[(int)(i)], b[(int)(i)], c[(int)(i)]);
         }
         
         sh->set1fv("redCol",   a,   n);
