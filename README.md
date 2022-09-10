@@ -10,7 +10,7 @@ A 3D Cellular Automata visualization using OpenGL based on Jason Rampe's [blog](
 - Handles Von Neumann and Moore Neighborhoods
 - Handles Multi-State CA Rules (Game of Life is a 2 state CA Rule)
 - Multithreaded CA Calculation
-- Voxel coloring based on distance from center (Interpolation was based on (these logistic curves) [https://www.desmos.com/calculator/bfwup2kq8l])
+- Voxel coloring based on distance from center (Interpolation was based on [these logistic curves](https://www.desmos.com/calculator/bfwup2kq8l))
 - Lighting/shadows 
 - Fuzzy String Matching for input menu
 
