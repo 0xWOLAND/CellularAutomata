@@ -31,17 +31,17 @@ A 3D Cellular Automata visualization using OpenGL based on Jason Rampe's [blog](
 
 
 ### Controls
-'i' -> rotate CA Cube about 'i' unit vector
-'j' -> rotate CA Cube about 'j' unit vector
-'k' -> rotate CA Cube about 'k' unit vector
-'z' -> zoom in (finer tune)
-'x' -> zoom in (coarser tune)
-'p' -> pause animation
-'t' -> pause rotation
-'a' -> translate by vec3(1,0,0)
-'d' -> translate by vec3(-1,0,0)
-'w' -> translate by vec3(0,1,0)
-'s' -> translate by vec3(0,-1,0)
-'q' -> translate by vec3(0,0,1)
-'e' -> translate by vec3(0,0,-1)
-'esc' -> close window
+- 'i' -> rotate CA Cube about 'i' unit vector
+- 'j' -> rotate CA Cube about 'j' unit vector
+- 'k' -> rotate CA Cube about 'k' unit vector
+- 'z' -> zoom in (finer tune)
+- 'x' -> zoom in (coarser tune)
+- 'p' -> pause animation
+- 't' -> pause rotation
+- 'a' -> translate by vec3(1,0,0)
+- 'd' -> translate by vec3(-1,0,0)
+- 'w' -> translate by vec3(0,1,0)
+- 's' -> translate by vec3(0,-1,0)
+- 'q' -> translate by vec3(0,0,1)
+- 'e' -> translate by vec3(0,0,-1)
+- 'esc' -> close window
