@@ -1,6 +1,3 @@
-/*
- @author - Sol Zilberman
- */
 #ifndef VERTEXARRAY
 #define VERTEXARRAY
 #include <GL/glew.h>
