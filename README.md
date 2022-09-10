@@ -1,7 +1,7 @@
 ![Cellular-Automata-Ubuntu-2022-09](https://user-images.githubusercontent.com/41707552/189493446-0fbbb17c-8c93-4498-aa03-a4b18e080355.gif)
 <figcaption align = "center"><b>20x20 Amoeba Cellular Automata Rule</b></figcaption>
 # CellularAutomata
-A 3D Cellular Automata visualization using OpenGL based on Jason Rampe's [blog](https://softologyblog.wordpress.com/category/cellular-automata-2/). 
+A 3D Cellular Automata visualization using OpenGL based on Jason Rampe's ![blog](https://softologyblog.wordpress.com/category/cellular-automata-2/). 
 
 ### Features
 - Voxel rasterization using OpenGL, GLUT, GLEW
